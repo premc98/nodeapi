@@ -9,7 +9,9 @@ config({
 
 //Using Middlewares
 app.use(express.json());
-app.use("/users", userRouter);
+
+//Using routes
+app.use("/api/v1/users", userRouter);
 
 app.get("/", async(req,res)=>{
     res.send("hey man you got this stay strong and i know you will land a great job, this is the start ")

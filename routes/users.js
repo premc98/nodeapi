@@ -2,29 +2,25 @@ import express from "express";
 import { 
     getAllUsers, 
     createNewUser, 
-    updateUserbyId, 
-    deleteUserbyId,
-    getUserbyId 
+    getUserbyId,
+    logIn 
 } from "../controllers/users.js";
 
 const router = express.Router();
 
-//router.use(express.json()); //for reading req.body
-
-
-
 router.get("/all", getAllUsers);
 
 router.post("/new", createNewUser);
+
+router.post("/login", logIn);
+
 
 //dynamic routing
 //"/userid/:id/:key"
 
 router
     .route("/userid/:id")
-    .get(getUserbyId)
-    .put(updateUserbyId)
-    .delete(deleteUserbyId);
+    .get(getUserbyId);
 
 export default router;
 
