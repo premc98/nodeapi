@@ -3,7 +3,8 @@ import {
     getAllUsers, 
     createNewUser, 
     getUserbyId,
-    logIn 
+    logIn,
+    getMyprofile 
 } from "../controllers/users.js";
 
 const router = express.Router();
@@ -13,6 +14,8 @@ router.get("/all", getAllUsers);
 router.post("/new", createNewUser);
 
 router.post("/login", logIn);
+
+router.get("/me", getMyprofile);
 
 
 //dynamic routing

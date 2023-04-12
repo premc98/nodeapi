@@ -1,6 +1,7 @@
 import {User} from "../models/users.js";
 import bcrypt from "bcrypt";
 import { sendCookie } from "../utils/features.js";
+import jwt from "jsonwebtoken";
 
 export const getAllUsers = async (req,res) => {
 
@@ -29,7 +30,18 @@ export const createNewUser = async (req,res) => {
 };
 
 export const getUserbyId = async (req,res) => {
-    
+    const {id} = req.params;
+
+    const user = await User.findById(id);
+    if(!user)
+        return res.status(404).json({
+            status: false,
+            message: "User not found",
+        });
+    res.status(200).json({
+        name: user.name,
+        email: user.email,
+    });
 };
 
 export const logIn = async (req,res,next) => {
@@ -51,6 +63,31 @@ export const logIn = async (req,res,next) => {
         });
     
     sendCookie(user,res,`Welcome Home ${user.name}`,200);
+};
+
+export const getMyprofile = async (req,res) => {
+
+    const {token} = req.cookies;
+
+    if(!token)
+        return res.status(404).json({
+            status: false,
+            message: "Login first",
+        });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await User.findById(decoded._id);
+    if(!user)
+        return res.status(404).json({
+            status: false,
+            message: "User not found",
+        });
+    res.status(200).json({
+        name: user.name,
+        email: user.email,
+        created: user.createdAt,
+    });
+
 };
 
 // export const updateUserbyId = async (req,res) => {
