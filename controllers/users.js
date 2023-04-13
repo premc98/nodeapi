@@ -4,6 +4,17 @@ import { sendCookie } from "../utils/features.js";
 import jwt from "jsonwebtoken";
 
 export const getAllUsers = async (req,res) => {
+    const users = await User.find({})
+    if(!users)
+        return res.status(404).json({
+            status: false,
+            message: "No users in DB"
+        });
+    console.log(users[0]);    
+    res.status(200).json({
+        status: true,
+        users,
+    });
 
 };
 
@@ -65,27 +76,25 @@ export const logIn = async (req,res,next) => {
     sendCookie(user,res,`Welcome Home ${user.name}`,200);
 };
 
-export const getMyprofile = async (req,res) => {
+export const logOut = async (req,res) => {
+    res
+        .status(200)
+        .cookie("token","",{
+            expires: new Date(Date.now())
+        })
+        .json({
+            status: true,
+            message: `Logged out! ${req.user.name}`,
 
-    const {token} = req.cookies;
-
-    if(!token)
-        return res.status(404).json({
-            status: false,
-            message: "Login first",
         });
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await User.findById(decoded._id);
-    if(!user)
-        return res.status(404).json({
-            status: false,
-            message: "User not found",
-        });
+};
+
+export const getMyprofile = (req,res) => {
+
     res.status(200).json({
-        name: user.name,
-        email: user.email,
-        created: user.createdAt,
+        status: true,
+        user: req.user,
     });
 
 };
