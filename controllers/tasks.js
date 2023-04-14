@@ -86,8 +86,14 @@ export const DeleteTask = async (req,res) => {
     const {id,taskCompleted} = req.params;
     const user_id = req.user._id;
 
-     // const task = await Tasks.findById(id);
-    // await task.remove();
+    //const task = await Tasks.findById(id);
+
+    // if(!task)
+    //     return res.status(404).json({
+    //         status: false,
+    //         message: "invalidID",
+    //     });
+    //await task.deleteOne();
 
     await Tasks.updateOne(
         { '_id': user_id, 'EachTask': { $elemMatch: { '_id': id } } },
