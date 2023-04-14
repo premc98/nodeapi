@@ -51,3 +51,50 @@ export const getMyTasks = async (req,res) => {
     });
     
 };
+
+export const ChangeCompletedStatus = async (req,res) => {
+    const {id,taskCompleted} = req.params;
+    const user_id = req.user._id;
+
+    // const task = await Tasks.findById(id);
+    // task.isCompleted = !task.isCompleted;
+    // await task.save();
+
+
+    if (taskCompleted == "yes") {
+        await Tasks.updateOne(
+            { '_id': user_id, 'EachTask': { $elemMatch: { '_id': id, 'isCompleted': false } } },
+            { $set: { 'EachTask.$.isCompleted': true  } } 
+            );
+        res.status(200).json({
+            status: true,
+            message: `task ${id} is marked as completed`
+        });
+    } else if (taskCompleted == "no") {
+        await Tasks.updateOne(
+            { '_id': user_id, 'EachTask': { $elemMatch: { '_id': id, 'isCompleted': true } } },
+            { $set: { 'EachTask.$.isCompleted': false  } } 
+            );
+        res.status(200).json({
+            status: true,
+            message: `task ${id} is marked as incmoplete`
+        });      
+    }
+};
+
+export const DeleteTask = async (req,res) => {
+    const {id,taskCompleted} = req.params;
+    const user_id = req.user._id;
+
+     // const task = await Tasks.findById(id);
+    // await task.remove();
+
+    await Tasks.updateOne(
+        { '_id': user_id, 'EachTask': { $elemMatch: { '_id': id } } },
+        { $pull: { 'EachTask': {'_id': id} } });
+    res.status(200).json({
+        status: true,
+        message: `task ${id} is deleted`
+    });  
+
+};

@@ -1,7 +1,10 @@
 import express from "express";
 import { 
     newTask,
-    getMyTasks
+    getMyTasks,
+    ChangeCompletedStatus,
+    DeleteTask
+
 } from "../controllers/tasks.js";
 import { isAuthenticated } from "../middlewares/auth.js";
 
@@ -16,6 +19,11 @@ router.post("/new", isAuthenticated, newTask);
 
 router.get("/getmytasks", isAuthenticated, getMyTasks);
 
+router 
+    .route("/:id/:taskCompleted")
+    .put(isAuthenticated, ChangeCompletedStatus)
+    .delete(isAuthenticated, DeleteTask);
 
-export default router;
+
+    export default router;
 
