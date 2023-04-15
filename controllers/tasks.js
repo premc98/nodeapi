@@ -37,22 +37,20 @@ export const newTask = async (req,res) => {
 
 };
 
-export const getMyTasks = async (req,res) => {
+export const getMyTasks = async (req,res,next) => {
     const tasks = await Tasks.findById(req.user._id);
+    //console.log(tasks);
 
-    if(!tasks)
-        return res.status(404).json({
-            status: false,
-            message: `No task found for user ${req.user.name}`
-        });
+    if(!tasks || tasks.EachTask.length == 0)
+        return next(new Error(`Error:No task found for user ${req.user.name}`));
     res.status(200).json({
         status: true,
-        tasks,
+        tasks: tasks.EachTask,
     });
     
 };
 
-export const ChangeCompletedStatus = async (req,res) => {
+export const ChangeCompletedStatus = async (req,res,next) => {
     const {id,taskCompleted} = req.params;
     const user_id = req.user._id;
 
@@ -60,31 +58,41 @@ export const ChangeCompletedStatus = async (req,res) => {
     // task.isCompleted = !task.isCompleted;
     // await task.save();
 
-
     if (taskCompleted == "yes") {
-        await Tasks.updateOne(
+        const promise = await Tasks.updateOne(
             { '_id': user_id, 'EachTask': { $elemMatch: { '_id': id, 'isCompleted': false } } },
             { $set: { 'EachTask.$.isCompleted': true  } } 
             );
+        if (promise.matchedCount == 0)
+            return next(new Error("Error: Task already marked as completeeeee"));
         res.status(200).json({
             status: true,
             message: `task ${id} is marked as completed`
         });
     } else if (taskCompleted == "no") {
-        await Tasks.updateOne(
+        const promise = await Tasks.updateOne(
             { '_id': user_id, 'EachTask': { $elemMatch: { '_id': id, 'isCompleted': true } } },
             { $set: { 'EachTask.$.isCompleted': false  } } 
             );
+        if (promise.matchedCount == 0)
+            return next(new Error("Error: Task already marked as incompleteeeee"));
         res.status(200).json({
             status: true,
-            message: `task ${id} is marked as incmoplete`
+            message: `task ${id} is marked as incomplete`
         });      
     }
 };
 
-export const DeleteTask = async (req,res) => {
+export const DeleteTask = async (req,res,next) => {
     const {id,taskCompleted} = req.params;
     const user_id = req.user._id;
+
+    const task = await Tasks.findOne({ '_id': user_id, 'EachTask': { $elemMatch: { '_id': id } } });
+    console.log(task);
+
+    if(!task)
+       return next(new Error(`Error: Task with id ${id} not found` ));
+
 
     //const task = await Tasks.findById(id);
 

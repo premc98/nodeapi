@@ -3,6 +3,7 @@ import userRouter from "./routes/users.js";
 import tasksRouter from "./routes/tasks.js";
 import {config} from "dotenv";
 import cookieParser from "cookie-parser";
+import { errorMiddleware } from "./middlewares/error.js";
 
 export const app = express();
 config({
@@ -21,3 +22,5 @@ app.get("/", (req,res)=>{
     res.send("hey man you got this stay strong and i know you will land a great job, this is the start ")
 });
 
+//Global Error Middleware
+app.use(errorMiddleware);
