@@ -40,6 +40,7 @@ export const newTask = async (req,res) => {
 };
 
 export const getMyTasks = async (req,res,next) => {
+    //const tasks = await Tasks.find({ user: req.user._id});
     const tasks = await Tasks.findById(req.user._id);
     //console.log(tasks);
 
@@ -47,6 +48,7 @@ export const getMyTasks = async (req,res,next) => {
         return next(new ErrorHandler(`Error:No task found for user ${req.user.name}`, 404));
     res.status(200).json({
         status: true,
+        //tasks,
         tasks: tasks.EachTask,
     });
     

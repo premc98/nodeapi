@@ -48,18 +48,26 @@ export const getUserbyId = async (req,res,next) => {
 };
 
 export const logIn = async (req,res,next) => {
-    const {email,password} = req.body;
-    const user = await User.findOne({email}).select("+password"); 
-    //here we are providing +password because we have defined select: false for password in the schema
+    try {
+        
+        const {email,password} = req.body;
+        const user = await User.findOne({email}).select("+password"); 
+        //here we are providing +password because we have defined select: false for password in the schema
+        
+        if(!user)
+            return next(new ErrorHandler(`Error: User with email ${email} does not exist`, 404));
+        const ismatch = await bcrypt.compare(password, user.password);
+        
+        if(!ismatch)
+            return next(new ErrorHandler(`Error: Invalid Password`, 404));
+        
+        sendCookie(user,res,`Welcome Back ${user.name}`,200);
+        
+    } catch (error) {
+        next(error);
+        
+    }
     
-    if(!user)
-        return next(new ErrorHandler(`Error: User with email ${email} does not exist`, 404));
-    const ismatch = await bcrypt.compare(password, user.password);
-    
-    if(!ismatch)
-        return next(new ErrorHandler(`Error: Invalid Password`, 404));
-    
-    sendCookie(user,res,`Welcome Back ${user.name}`,200);
 };
 
 export const logOut = async (req,res) => {
