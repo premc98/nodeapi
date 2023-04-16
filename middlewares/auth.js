@@ -1,15 +1,16 @@
 import {User}  from "../models/users.js";
 import jwt from "jsonwebtoken";
+import ErrorHandler from "./error.js";
 
 export const isAuthenticated = async (req,res,next) => {
     const {token} = req.cookies;
 
     if(!token)
-        return next(new Error(`Error: Login First`));
+        return next(new ErrorHandler(`Error: Login First`, 404));
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     req.user = await User.findById(decoded._id);
     if(!req.user)
-        return next(new Error(`Error: User not found`));
+        return next(new ErrorHandler(`Error: User not found`, 404));
     next();
 };

@@ -1,9 +1,11 @@
+import ErrorHandler from "../middlewares/error.js";
 import { Tasks } from "../models/tasks.js";
 
 export const newTask = async (req,res) => {
     const {title,description} = req.body;
 
     const tasks = await Tasks.findById(req.user._id);
+    //console.log(tasks);
 
     if(!tasks){
         var myObj = [{
@@ -25,7 +27,7 @@ export const newTask = async (req,res) => {
             description,
         }
         await Tasks.findOneAndUpdate({_id: req.user._id},{$push: { EachTask: myObj}},{
-            upsert: true
+            //upsert: true
         });
         res.status(201).json({
             success: true,
@@ -42,7 +44,7 @@ export const getMyTasks = async (req,res,next) => {
     //console.log(tasks);
 
     if(!tasks || tasks.EachTask.length == 0)
-        return next(new Error(`Error:No task found for user ${req.user.name}`));
+        return next(new ErrorHandler(`Error:No task found for user ${req.user.name}`, 404));
     res.status(200).json({
         status: true,
         tasks: tasks.EachTask,
@@ -64,7 +66,7 @@ export const ChangeCompletedStatus = async (req,res,next) => {
             { $set: { 'EachTask.$.isCompleted': true  } } 
             );
         if (promise.matchedCount == 0)
-            return next(new Error("Error: Task already marked as completeeeee"));
+            return next(new ErrorHandler("Error: Task already marked as completeeeee", 404));
         res.status(200).json({
             status: true,
             message: `task ${id} is marked as completed`
@@ -75,7 +77,7 @@ export const ChangeCompletedStatus = async (req,res,next) => {
             { $set: { 'EachTask.$.isCompleted': false  } } 
             );
         if (promise.matchedCount == 0)
-            return next(new Error("Error: Task already marked as incompleteeeee"));
+            return next(new ErrorHandler("Error: Task already marked as incompleteeeee,", 404));
         res.status(200).json({
             status: true,
             message: `task ${id} is marked as incomplete`
@@ -88,10 +90,10 @@ export const DeleteTask = async (req,res,next) => {
     const user_id = req.user._id;
 
     const task = await Tasks.findOne({ '_id': user_id, 'EachTask': { $elemMatch: { '_id': id } } });
-    console.log(task);
+    //console.log(task);
 
     if(!task)
-       return next(new Error(`Error: Task with id ${id} not found` ));
+       return next(new ErrorHandler(`Error: Task with id ${id} not found`, 404 ));
 
 
     //const task = await Tasks.findById(id);
